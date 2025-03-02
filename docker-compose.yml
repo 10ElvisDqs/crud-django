@@ -1,0 +1,81 @@
+# version: '3'
+
+# services:
+#   django:
+#     build: .
+#     container_name: django-crud-app
+#     volumes:
+#       - .:/app  # Monta el directorio local actual en /app dentro del contenedor
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       - PYTHONUNBUFFERED=1  # Para evitar buffering en los logs
+#     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ 
+
+version: '3'
+
+services:
+  django:
+    build: .
+    container_name: django-crud-app
+    volumes:
+      - .:/app  # Monta el directorio local actual en /app dentro del contenedor
+      - static_volume:/app/static  # Persistencia para archivos estáticos
+      - media_volume:/app/media  # Persistencia para archivos de medios
+    ports:
+      - "8000:8000"  # Este puerto es opcional ahora que Nginx maneja las solicitudes en el puerto 80
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=crud_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    command: /bin/bash -c "./entrypoint.sh"  # Ejecuta el script entrypoint.sh al iniciar el contenedor
+    # command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]  # Usamos el servidor de desarrollo de Django
+    depends_on:
+      - db  # La base de datos debe estar disponible antes de arrancar Django
+
+  db:
+    image: postgres:13
+    container_name: django-crud-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistencia de datos
+    environment:
+      POSTGRES_DB: crud_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  nginx:
+    image: nginx:alpine  # Imagen ligera de Nginx
+    container_name: django-crud-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Monta el archivo de configuración personalizado de Nginx
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8080:80"  # Nginx escuchará en el puerto 80
+    depends_on:
+      - django  # Asegura que Django esté listo antes de iniciar Nginx
+
+  pgadmin:
+    image: dpage/pgadmin4:latest  # Imagen oficial de pgAdmin
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com  # Usuario por defecto
+      PGADMIN_DEFAULT_PASSWORD: admin  # Contraseña por defecto
+    ports:
+      - "5050:80"  # pgAdmin escuchará en el puerto 5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  # Persistencia de datos de pgAdmin
+    depends_on:
+      - db  # Asegura que la base de datos esté lista antes de iniciar pgAdmin
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  pgadmin_data:

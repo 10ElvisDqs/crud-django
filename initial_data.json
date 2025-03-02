@@ -1,0 +1,44 @@
+[
+    {
+      "model": "auth.user",
+      "pk": 1,
+      "fields": {
+        "username": "admin",
+        "password": "password",
+        "is_staff": true,
+        "is_superuser": true,
+        "is_active": true
+      }
+    },
+    {
+      "model": "crud.task",
+      "pk": 1,
+      "fields": {
+        "title": "Task 1",
+        "description": "This is the first task",
+        "completed": false,
+        "created": "2025-03-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "crud.task",
+      "pk": 2,
+      "fields": {
+        "title": "Task 2",
+        "description": "This is the second task",
+        "completed": true,
+        "created": "2025-03-01T00:00:00Z"
+      }
+    },
+    {
+      "model": "crud.task",
+      "pk": 3,
+      "fields": {
+        "title": "Task 3",
+        "description": "This is the third task",
+        "completed": false,
+        "created": "2025-03-01T00:00:00Z"
+      }
+    }
+  ]
+  
